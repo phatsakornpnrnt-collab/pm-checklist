@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PM Checklist - ICE Co.,Ltd.</title>
+    <!-- Tailwind CSS CDN for high fidelity responsive UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f1f5f9;
+        }
+        /* เส้นตารางวิศวกรรมที่แสดงผลอย่างคมชัด */
+        .form-table th, .form-table td {
+            border: 1px solid #cbd5e1 !important;
+            padding: 6px 10px !important;
+            vertical-align: middle;
+        }
+        .section-header {
+            background-color: #ecfdf5 !important;
+            color: #065f46 !important;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        input[type="text"], input[type="date"], input[type="number"] {
+            border-bottom: 1px solid #94a3b8;
+            padding: 2px 4px;
+            transition: all 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-bottom: 2px solid #10b981;
+            background-color: #f8fafc;
+        }
+        
+        /* สไตล์กำหนดสำหรับ Dropdown */
+        select {
+            cursor: pointer;
+        }
+
+        /* ซ่อนช่องรูปภาพสำหรับการพิมพ์บนบราวเซอร์ปกติ */
+        .print-sig-container {
+            display: none;
+        }
+        
+        /* --------------------------------------------------------------------------
+           🖨️ HIGH-DPI PRINT & REPORT STYLESHEET (โหมดออกรายงาน PDF สีดำเข้มคมชัด)
+           -------------------------------------------------------------------------- */
+        @media print {
+            body { 
+                background-color: white !important; 
+                color: #000000 !important; 
+                padding: 0; 
+                margin: 0; 
+            }
+            .no-print { display: none !important; }
+            .shadow-lg, .shadow-sm { box-shadow: none !important; }
+            .main-container { border: none !important; padding: 0 !important; max-width: 100% !important; }
+            
+            /* บังคับตัวหนังสือบนหัวเอกสารและตารางทั้งหมดให้เป็นสีดำเข้มคมชัด */
+            h1, h2, h3, h4, p, span, label, td, th, input, textarea, select {
+                color: #000000 !important;
+                font-weight: bold !important;
+            }
+            
+            /* ปรับเส้นคั่นชื่อบริษัทภาษาอังกฤษ-ไทยเป็นสีดำเข้ม */
+            .company-divider {
+                border-bottom: 6px solid #000000 !important;
+            }
+            
+            /* ปรับแต่ง Dropdown ตัวเลือกประเภทห้องเมื่อสั่งพิมพ์ */
+            #systemType {
+                display: none !important;
+            }
+            #systemTypeOther {
+                display: block !important;
+                border: none !important;
+                background-color: transparent !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                font-size: 14px !important;
+                font-weight: bold !important;
+                text-align: right !important;
+            }
+
+            /* ปรับแถบสีตารางข้อกำหนดให้เป็นสีเทาอ่อนเพื่อความสวยงามเวลารับเป็นขาวดำ */
+            .section-header {
+                background-color: #e2e8f0 !important;
+                color: #000000 !important;
+                border-color: #000000 !important;
+            }
+            .bg-emerald-50, .bg-emerald-50\/50, .bg-slate-50 {
+                background-color: #ffffff !important;
+                border: 1px solid #000000 !important;
+            }
+            
+            .form-table th, .form-table td {
+                border: 1px solid #000000 !important;
+            }
+            
+            /* ซ่อนลูกศร Dropdown ตัวเลือกสถานะทั้งหมดให้ออกมาเหมือนพิมพ์ปกติ */
+            select {
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                background-image: none !important;
+                border: none !important;
+                background-color: transparent !important;
+                padding: 0 !important;
+            }
+
+            /* ปรับแต่งปุ่มวิทยุ (Radio Checks) ให้เป็นสีดำเด่นเวลากดพิมพ์รายงาน */
+            input[type="radio"] {
+                appearance: none; -webkit-appearance: none; border: 1.5px solid #000000 !important;
+                width: 14px; height: 14px; border-radius: 50%; position: relative; display: inline-block;
+            }
+            input[type="radio"]:checked::after {
+                content: ''; width: 8px; height: 8px; background: #000000 !important; position: absolute; top: 1.5px; left: 1.5px; border-radius: 50%;
+            }
+
+            /* จัดตำแหน่งช่องรูปภาพลายเซ็นให้อยู่ตรงกลางเป๊ะๆ ไม่เอียงซ้าย */
+            .sig-box-trigger {
+                display: none !important;
+            }
+            .print-sig-container {
+                display: flex !important;
+                width: 100% !important;
+                height: 56px !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 auto !important;
+            }
+            .print-sig-img {
+                max-height: 56px !important;
+                max-width: 160px !important;
+                object-fit: contain !important;
+                display: block !important;
+                margin: 0 auto !important;
+            }
+        }
+        
+        /* หน้าต่าง Modal */
+        .modal {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.75);
+            z-index: 1000; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal.active { display: flex; }
+        .popup-canvas {
+            touch-action: none; cursor: crosshair;
+            background-color: #ffffff; border: 2px dashed #10b981;
+        }
+    </style>
+</head>
+<body class="text-slate-800 p-2 sm:p-4">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[2000] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="customConfirmModal" class="modal no-print">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 border border-slate-200">
+            <h3 class="font-bold text-lg text-slate-800 mb-2">ยืนยันการดำเนินการ</h3>
+            <p id="confirmMessage" class="text-sm text-slate-600 mb-5">คุณต้องการทำรายการนี้ใช่หรือไม่?</p>
+            <div class="flex gap-3 justify-end">
+                <button id="confirmCancelBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer">ยกเลิก</button>
+                <button id="confirmOkBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition cursor-pointer">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- แผงควบคุมระบบงาน PM (ไม่แสดงเวลาพิมพ์ออก PDF) -->
+    <div class="max-w-5xl mx-auto no-print bg-emerald-950 text-white p-3 rounded-t-xl flex flex-wrap gap-3 items-center justify-between shadow-md text-xs">
+        <div class="flex items-center gap-2">
+            <span class="bg-emerald-500 text-white font-bold px-2 py-0.5 rounded text-[10px]">🟢 ONLINE</span>
+            <span class="font-bold tracking-wider text-emerald-200">ระบบบันทึกรายงาน PM : ICE Co.,Ltd.</span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <button onclick="saveCurrentData()" class="bg-emerald-500 hover:bg-emerald-600 px-4 py-1.5 rounded font-bold transition shadow cursor-pointer">💾 บันทึกข้อมูล</button>
+            <button onclick="triggerClearForm()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded font-medium transition cursor-pointer">🧹 ล้างฟอร์ม</button>
+            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 px-4 py-1.5 rounded font-bold transition shadow cursor-pointer">📊 ออกรายงาน (Excel)</button>
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded font-bold transition shadow cursor-pointer">🖨️ ออกรายงาน (PDF)</button>
+        </div>
+    </div>
+
+    <!-- แผงประวัติรายงานเก่าบนเครื่อง (ไม่แสดงเวลาพิมพ์ออก PDF) -->
+    <div class="max-w-5xl mx-auto no-print bg-slate-800 text-slate-300 p-2 flex flex-col sm:flex-row gap-2 items-center text-[11px] border-b-2 border-emerald-900 shadow-md">
+        <span class="font-bold whitespace-nowrap">📂 รายงานที่บันทึกบนเครื่อง:</span>
+        <select id="historySelect" class="bg-slate-700 border border-slate-600 rounded px-2 py-1 flex-1 text-white focus:outline-none cursor-pointer">
+            <option value="">-- เลือกโหลดรายงานเก่ามาแสดงผลหรือสั่งพิมพ์ --</option>
+        </select>
+        <button onclick="loadHistoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded font-medium cursor-pointer">โหลดข้อมูล</button>
+        <button onclick="triggerClearStorage()" class="text-red-400 hover:text-red-300 ml-auto cursor-pointer">ล้างประวัติทั้งหมด</button>
+    </div>
+
+    <!-- ส่วนเนื้อหาเอกสารแบบฟอร์มหลัก -->
+    <div class="main-container max-w-5xl mx-auto bg-white p-4 sm:p-6 shadow-lg border-x border-b border-slate-200 rounded-b-xl">
+        
+        <!-- ส่วนหัวฟอร์ม (Header: ชนิดข้อความซ้าย-ขวา คมชัดสูง ปราศจากปัญหาภาพแตก) -->
+        <div class="w-full flex flex-col md:flex-row items-start justify-between bg-white border-b-2 border-emerald-700 pb-4 mb-4">
+            
+            <!-- ด้านซ้าย: ชื่อบริษัทและเส้นกั้นสีเขียว (ซึ่งจะเปลี่ยนเป็นสีดำสนิท 100% เมื่อพิมพ์ PDF) -->
+            <div class="w-full md:w-1/2 text-left mb-4 md:mb-0">
+                <h2 class="text-lg md:text-xl font-black tracking-wide text-slate-950 print:text-black leading-tight">
+                    INNOVATIVE CONSULTANT<br>AND ENGINEERING CO.,LTD.
+                </h2>
+                <div class="company-divider w-full border-b-[6px] border-emerald-600 my-2 print:border-black max-w-[320px]"></div>
+                <h3 class="text-sm md:text-base font-bold text-slate-800 print:text-black">
+                    บริษัท อินโนเวทีฟ คอนซัลแตนท์ แอนด์ เอ็นจิเนียริ่ง จำกัด
+                </h3>
+            </div>
+
+            <!-- ด้านขวา: ชื่องาน PM และ Dropdown ตัวเลือกประเภทของห้องที่ตรวจวัด -->
+            <div class="w-full md:w-1/2 md:text-right flex flex-col md:items-end items-start">
+                <h1 class="text-xl md:text-2xl font-black tracking-wider uppercase text-emerald-800 print:text-black print:font-extrabold leading-none">Preventive Maintenance</h1>
+                
+                <!-- ตัวเลือกประเภทห้องแบบ Dropdown และ Input สำหรับแสดงข้อความเพิ่มเติ่ม -->
+                <div class="mt-3 flex flex-col md:items-end items-start gap-1 w-full max-w-[320px]">
+                    <select id="systemType" class="print:hidden text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded border border-emerald-200 focus:outline-none w-full md:text-right text-left cursor-pointer" onchange="handleSystemTypeChange()">
+                        <option value="Negative Pressure Room">Negative Pressure Room</option>
+                        <option value="Operation Room">Operation Room</option>
+                        <option value="Cleanroom">Cleanroom</option>
+                        <option value="Other">อื่น ๆ (ระบุข้อมูลประเภทห้องเพิ่มเติม...)</option>
+                    </select>
+                    <!-- Input สำหรับแสดงข้อมูลตอนสั่งพิมพ์หรือพิมพ์ "อื่น ๆ" -->
+                    <input type="text" id="systemTypeOther" class="hidden print:block text-xs md:text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded border border-emerald-200 focus:outline-none print:border-none print:bg-transparent print:p-0 print:text-black w-full md:text-right text-left" value="Negative Pressure Room" placeholder="ระบุประเภทห้อง...">
+                </div>
+            </div>
+        </div>
+
+        <!-- รายละเอียดโครงการ/ลูกค้า -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-[11px] sm:text-xs mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <div class="space-y-2">
+                <div class="flex items-center"><span class="font-bold w-24 text-slate-700 print:text-black">Project :</span><input type="text" id="project" class="flex-1 bg-transparent font-medium" value="Maintenance Negative Pressure"></div>
+                <div class="flex items-center"><span class="font-bold w-24 text-slate-700 print:text-black">Customer :</span><input type="text" id="customer" class="flex-1 bg-transparent font-medium" value="RAJTHANEE HOSPITAL"></div>
+                <div class="flex items-center"><span class="font-bold w-24 text-slate-700 print:text-black">Location :</span><input type="text" id="location" class="flex-1 bg-transparent font-medium" value="Negative Pressure Room 606"></div>
+                <div class="flex items-center"><span class="font-bold w-24 text-slate-700 print:text-black">ครั้งที่ (No.) :</span><input type="text" id="timeCount" class="w-16 bg-transparent text-center font-bold" value="1"></div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center"><span class="font-bold w-28 text-slate-700 print:text-black">Report No :</span><input type="text" id="reportNo" class="flex-1 bg-transparent font-bold text-emerald-700 print:text-black" value="RE-PM2026-01"></div>
+                <div class="flex items-center"><span class="font-bold w-28 text-slate-700 print:text-black">Ref. Doc No :</span><input type="text" id="refDoc" class="flex-1 bg-transparent" placeholder="-"></div>
+                <div class="flex items-center"><span class="font-bold w-28 text-slate-700 print:text-black">Action Date :</span><input type="date" id="actionDate" class="flex-1 bg-transparent text-slate-800 font-medium"></div>
+                <div class="flex items-center"><span class="font-bold w-28 text-slate-700 print:text-black">Machine Model :</span><input type="text" id="machineModel" class="flex-1 bg-transparent" placeholder="ระบุรุ่นเครื่อง"></div>
+                <div class="flex items-center"><span class="font-bold w-28 text-slate-700 print:text-black">Series / S/N :</span><input type="text" id="series" class="flex-1 bg-transparent" placeholder="ระบุซีเรียลเนมเบอร์"></div>
+            </div>
+        </div>
+
+        <!-- ส่วนตารางรายการตรวจสอบบำรุงรักษา -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse form-table text-[11px] sm:text-[12px] shadow-sm">
+                <thead>
+                    <tr class="bg-slate-200 text-slate-800 text-center font-bold print:bg-slate-300 print:text-black">
+                        <th class="w-10">ลำดับ</th>
+                        <th class="text-left">รายการตรวจสอบ (Description)</th>
+                        <th class="w-48 text-center">ค่าที่วัดได้ / รายละเอียด</th>
+                        <th class="w-10 text-emerald-700 print:text-black">N</th>
+                        <th class="w-10 text-amber-600 print:text-black">AB</th>
+                        <th class="w-10 text-red-600 print:text-black">F</th>
+                        <th class="w-32 text-center">หมายเหตุ (Remark)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- หมวด A -->
+                    <tr class="section-header"><td class="text-center">A</td><td colspan="6">งานตรวจสอบทางกายภาพและความสะอาด (Visual Check & Mechanical Inspection)</td></tr>
+                    
+                    <!-- ข้อ 1 พร้อมตัวเลือก ปกติ / ล้างแล้ว / เปลี่ยนใหม่ -->
+                    <tr>
+                        <td class="text-center font-bold">1</td>
+                        <td>ทำความสะอาดคอยล์เย็น AHU และคอยล์ร้อน CDU</td>
+                        <td class="p-1">
+                            <select id="val-1_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-1" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-1" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-1" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-1" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <tr><td class="text-center font-bold">2</td><td class="font-semibold">ทำความสะอาด / เปลี่ยน ฟิลเตอร์เครื่อง AHU</td><td class="text-center text-slate-400 text-[10px] bg-slate-50 print:text-black print:bg-transparent">ตรวจสอบย่อยด้านล่าง</td><td colspan="3" class="bg-slate-50 print:bg-transparent"></td><td><input type="text" id="rem-2" class="w-full bg-transparent"></td></tr>
+                    
+                    <!-- ข้อ 2.1 พร้อมตัวเลือก -->
+                    <tr>
+                        <td class="text-center text-slate-400 print:text-black">2.1</td>
+                        <td class="pl-4 text-slate-700 print:text-black">- Prefilter (กรองหยาบ)</td>
+                        <td class="p-1">
+                            <select id="val-2_1_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-2_1" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-2_1" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-2_1" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-2_1" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <!-- ข้อ 2.2 พร้อมตัวเลือก -->
+                    <tr>
+                        <td class="text-center text-slate-400 print:text-black">2.2</td>
+                        <td class="pl-4 text-slate-700 print:text-black">- Medium filter (กรองละเอียดกลาง)</td>
+                        <td class="p-1">
+                            <select id="val-2_2_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-2_2" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-2_2" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-2_2" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-2_2" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <!-- ข้อ 2.3 พร้อมตัวเลือก -->
+                    <tr>
+                        <td class="text-center text-slate-400 print:text-black">2.3</td>
+                        <td class="pl-4 text-slate-700 print:text-black">- Hepafilter (กรองประสิทธิภาพสูงระดับโรงพยาบาล)</td>
+                        <td class="p-1">
+                            <select id="val-2_3_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-2_3" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-2_3" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-2_3" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-2_3" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <!-- ข้อ 3 พร้อมตัวเลือก -->
+                    <tr>
+                        <td class="text-center font-bold">3</td>
+                        <td>ทำความสะอาดหน้ากริดหัวจ่าย (Supply/Return/Exhaust)</td>
+                        <td class="p-1">
+                            <select id="val-3_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-3" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-3" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-3" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-3" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <!-- ข้อ 4 พร้อมตัวเลือก -->
+                    <tr>
+                        <td class="text-center font-bold">4</td>
+                        <td>ตรวจสอบท่อหุ้มฉนวน ปลอกหุ้ม และเทปพันท่อสารทำความเย็น</td>
+                        <td class="p-1">
+                            <select id="val-4_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-4" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-4" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-4" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-4" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <!-- ข้อ 5 พร้อมตัวเลือก -->
+                    <tr>
+                        <td class="text-center font-bold">5</td>
+                        <td>ตรวจสอบการสั่นสะเทือนและเสียงดังผิดปกติของ AHU</td>
+                        <td class="p-1">
+                            <select id="val-5_action" class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 text-xs font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="ปกติ">ปกติ</option>
+                                <option value="ล้างแล้ว">ล้างแล้ว</option>
+                                <option value="เปลี่ยนใหม่">เปลี่ยนใหม่</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-5" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td>
+                        <td class="text-center"><input type="radio" name="st-5" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td>
+                        <td class="text-center"><input type="radio" name="st-5" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-5" class="w-full bg-transparent"></td>
+                    </tr>
+                    
+                    <tr class="text-emerald-800 print:text-black"><td class="text-center font-bold">6</td><td>ตรวจสอบขอบยางและซีลประตูห้อง (Airtight Room Seals)</td><td class="text-center text-slate-500 font-semibold bg-emerald-50/50 print:text-black print:bg-transparent">เช็คซีลลมรั่ว</td><td class="text-center"><input type="radio" name="st-6" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td><td class="text-center"><input type="radio" name="st-6" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td><td class="text-center"><input type="radio" name="st-6" value="F" class="w-3.5 h-3.5 accent-red-500"></td><td><input type="text" id="rem-6" class="w-full text-slate-600 bg-transparent print:text-black" value="ป้องกันความดันรั่ว"></td></tr>
+
+                    <!-- หมวด B (อุณหภูมิ, ความชื้น, ลม, และแรงดัน) -->
+                    <tr class="section-header"><td class="text-center">B</td><td colspan="6">การวัดค่าพารามิเตอร์และการทำงานระบบปรับอากาศ (System Performance Measurements)</td></tr>
+                    
+                    <!-- อุณหภูมิและความชื้น -->
+                    <tr class="bg-blue-50/30 print:bg-transparent">
+                        <td class="text-center font-bold text-blue-800 print:text-black">7</td>
+                        <td class="font-semibold text-blue-900 print:text-black">วัดอุณหภูมิและความชื้นสัมพัทธ์ (Temperature & Humidity)</td>
+                        <td class="p-1.5">
+                            <div class="flex items-center gap-3 justify-center">
+                                <div class="flex items-center gap-1">
+                                    <span class="text-slate-500 text-[10px] print:text-black">Temp:</span>
+                                    <input type="text" id="val-7_temp" class="w-12 text-center font-bold border border-blue-200 rounded bg-white py-0.5 print:border-black" placeholder="-"> <span class="text-[10px] text-slate-500 print:text-black">°C</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-slate-500 text-[10px] print:text-black">RH:</span>
+                                    <input type="text" id="val-7_rh" class="w-12 text-center font-bold border border-blue-200 rounded bg-white py-0.5 print:border-black" placeholder="-"> <span class="text-[10px] text-slate-500 print:text-black">%</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-7" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td><td class="text-center"><input type="radio" name="st-7" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td><td class="text-center"><input type="radio" name="st-7" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-7" class="w-full bg-transparent"></td>
+                    </tr>
+
+                    <!-- วัดอัตราลม -->
+                    <tr class="bg-indigo-50/30 print:bg-transparent">
+                        <td class="text-center font-bold text-indigo-800 print:text-black">8</td>
+                        <td class="font-semibold text-indigo-900 print:text-black">ตรวจเช็คอัตราการไหลภายในห้อง (Airflow Volume / Flow Rate)</td>
+                        <td class="p-1.5 text-center">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <button onclick="openAirflowModal()" class="no-print bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] px-3 py-1 rounded shadow-sm w-full font-semibold transition cursor-pointer">➕ เพิ่ม/แก้ไขจุดวัดลม (Click)</button>
+                                <div class="flex items-center gap-1 font-bold text-indigo-700 bg-white px-3 py-1 rounded border border-indigo-200 w-full justify-center print:border-black print:text-black">
+                                    <span>Total:</span>
+                                    <input type="text" id="val-8_airflow" class="w-14 text-center bg-transparent border-none focus:outline-none pointer-events-none print:text-black" value="0" readonly>
+                                    <span class="text-[10px]">CFM</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-8" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td><td class="text-center"><input type="radio" name="st-8" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td><td class="text-center"><input type="radio" name="st-8" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-8" class="w-full bg-transparent"></td>
+                    </tr>
+
+                    <!-- วัดระดับแรงดันต่าง -->
+                    <tr class="bg-amber-50/30 print:bg-transparent">
+                        <td class="text-center font-bold text-amber-800 print:text-black">9</td>
+                        <td class="font-semibold text-amber-900 print:text-black">วัดระดับแรงดันต่างของห้อง (Room Differential Pressure)</td>
+                        <td class="p-1.5">
+                            <div class="flex flex-col gap-1 items-center justify-center">
+                                <div class="flex items-center gap-1">
+                                    <span class="text-slate-600 text-[10px] w-10 text-right print:text-black">จุดที่ 1:</span>
+                                    <input type="text" id="val-9_dp1" class="w-14 text-center font-bold border border-amber-300 rounded bg-white py-0.5 text-amber-800 print:border-black print:text-black" placeholder="-"> <span class="text-[9px] text-slate-500 print:text-black">Pa</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-slate-600 text-[10px] w-10 text-right print:text-black">จุดที่ 2:</span>
+                                    <input type="text" id="val-9_dp2" class="w-14 text-center font-bold border border-amber-300 rounded bg-white py-0.5 text-amber-800 print:border-black print:text-black" placeholder="-"> <span class="text-[9px] text-slate-500 print:text-black">Pa</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-9" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td><td class="text-center"><input type="radio" name="st-9" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td><td class="text-center"><input type="radio" name="st-9" value="F" class="w-3.5 h-3.5 accent-red-500"></td>
+                        <td><input type="text" id="rem-9" class="w-full bg-transparent" value="มาตรฐานโรงพยาบาล"></td>
+                    </tr>
+
+                    <!-- วัดค่าน้ำยาSuction / Discharge -->
+                    <tr>
+                        <td class="text-center font-bold">10</td>
+                        <td>วัดค่าน้ำยาของเครื่องปรับอากาศ (Refrigerant Pressure)</td>
+                        <td class="p-1">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center gap-1 justify-end"><span class="text-slate-500 text-[10px] print:text-black">- Suction:</span><input type="text" id="val-10_1" class="w-16 text-center font-bold border border-slate-300 rounded bg-white py-0.5 print:border-black" value="135"> <span class="text-[9px] text-slate-400 print:text-black">PSI</span></div>
+                                <div class="flex items-center gap-1 justify-end pt-1 border-t border-slate-200 print:border-black"><span class="text-slate-500 text-[10px] print:text-black">- Discharge:</span><input type="text" id="val-10_2" class="w-16 text-center font-bold border border-slate-300 rounded bg-white py-0.5 print:border-black"> <span class="text-[9px] text-slate-400 print:text-black">PSI</span></div>
+                            </div>
+                        </td>
+                        <td class="text-center"><input type="radio" name="st-10" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td><td class="text-center"><input type="radio" name="st-10" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td><td class="text-center"><input type="radio" name="st-10" value="F" class="w-3.5 h-3.5 accent-red-500"></td><td><input type="text" id="rem-10" class="w-full bg-transparent"></td>
+                    </tr>
+                    <tr><td class="text-center font-bold">11</td><td>ทดสอบการสั่งการระบบอุณหภูมิ (Thermostat Control Logic)</td><td class="text-center font-medium text-slate-500 print:text-black">ทดสอบ ตัด / ต่อ</td><td class="text-center"><input type="radio" name="st-11" value="N" class="w-3.5 h-3.5 accent-emerald-500" checked></td><td class="text-center"><input type="radio" name="st-11" value="AB" class="w-3.5 h-3.5 accent-amber-500"></td><td class="text-center"><input type="radio" name="st-11" value="F" class="w-3.5 h-3.5 accent-red-500"></td><td><input type="text" id="rem-11" class="w-full bg-transparent"></td></tr>
+
+                    <!-- หมวด C (AHU Electrical) -->
+                    <tr class="section-header"><td class="text-center">C</td><td colspan="6">การวัดค่าแรงดันและกระแสไฟฟ้าเครื่อง AHU (AHU Electrical Measurement)</td></tr>
+                    <tr>
+                        <td class="text-center font-bold">12</td><td>วัดค่าแรงดันไฟฟ้าฝั่งจ่ายให้ AHU (AHU Input Voltage)</td>
+                        <td colspan="4" class="p-2">
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-700 print:text-black">
+                                <div class="flex items-center justify-between"><span>L1 - L2 V:</span><input type="text" id="val-12_1" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="370"></div>
+                                <div class="flex items-center justify-between"><span>L2 - L3 V:</span><input type="text" id="val-12_2" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="368"></div>
+                                <div class="flex items-center justify-between"><span>L1 - L3 V:</span><input type="text" id="val-12_3" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="372"></div>
+                                <div class="flex items-center justify-between"><span>Control Panel V:</span><input type="text" id="val-12_4" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="216"></div>
+                            </div>
+                        </td>
+                        <td><input type="text" id="rem-12" class="w-full bg-transparent"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center font-bold">13</td><td>วัดค่ากระแสไฟฟ้ามอเตอร์และฮีตเตอร์ AHU (AHU Input Current)</td>
+                        <td colspan="4" class="p-2">
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-700 print:text-black">
+                                <div class="flex items-center justify-between"><span>Input L1 A:</span><input type="text" id="val-13_1" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="0.49"></div>
+                                <div class="flex items-center justify-between"><span>Input L2 A:</span><input type="text" id="val-13_2" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                                <div class="flex items-center justify-between"><span>Input L3 A:</span><input type="text" id="val-13_3" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                                <div class="flex items-center justify-between"><span>Fan Motor A:</span><input type="text" id="val-13_4" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                                <div class="flex items-center justify-between"><span>Heater A:</span><input type="text" id="val-13_5" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="8.8"></div>
+                                <div class="flex items-center justify-between"><span class="font-medium text-emerald-700 print:text-black">Control Circuit:</span><input type="text" id="val-13_6" class="w-10 text-center border rounded bg-emerald-50 text-emerald-800 print:text-black print:border-black print:bg-transparent" value="ปกติ"></div>
+                            </div>
+                        </td>
+                        <td><input type="text" id="rem-13" class="w-full bg-transparent"></td>
+                    </tr>
+
+                    <!-- หมวด D (CDU Electrical) -->
+                    <tr class="section-header"><td class="text-center">D</td><td colspan="6">การวัดค่าแรงดันและกระแสไฟฟ้าเครื่องคอยล์ร้อน CDU (CDU Electrical Measurement)</td></tr>
+                    <tr>
+                        <td class="text-center font-bold">14</td><td>วัดค่าแรงดันไฟฟ้าจ่ายให้ CDU (CDU Input Voltage)</td>
+                        <td colspan="4" class="p-2">
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-700 print:text-black">
+                                <div class="flex items-center justify-between"><span>L1 - L2 V:</span><input type="text" id="val-14_1" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="380"></div>
+                                <div class="flex items-center justify-between"><span>L2 - L3 V:</span><input type="text" id="val-14_2" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="380"></div>
+                                <div class="flex items-center justify-between"><span>L1 - L3 V:</span><input type="text" id="val-14_3" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="380"></div>
+                                <div class="flex items-center justify-between"><span>Control Panel V:</span><input type="text" id="val-14_4" class="w-10 text-center font-bold border rounded bg-white print:border-black" value="220"></div>
+                            </div>
+                        </td>
+                        <td><input type="text" id="rem-14" class="w-full bg-transparent"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center font-bold">15</td><td>วัดกระแสคอมเพรสเซอร์และพัดลมระบายความร้อน CDU (CDU Input Current)</td>
+                        <td colspan="4" class="p-2">
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-700 print:text-black">
+                                <div class="flex items-center justify-between"><span>Compressor L1 A:</span><input type="text" id="val-15_1" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                                <div class="flex items-center justify-between"><span>Compressor L2 A:</span><input type="text" id="val-15_2" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                                <div class="flex items-center justify-between"><span>Compressor L3 A:</span><input type="text" id="val-15_3" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                                <div class="flex items-center justify-between"><span>Condenser Fan A:</span><input type="text" id="val-15_4" class="w-10 text-center font-bold border rounded bg-white print:border-black"></div>
+                            </div>
+                        </td>
+                        <td><input type="text" id="rem-15" class="w-full bg-transparent"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- รายละเอียดสัญลักษณ์ใต้ตาราง -->
+        <div class="text-[10px] text-slate-500 mt-1.5 flex gap-4 justify-end px-1 print:text-black">
+            <span><b class="text-emerald-600 print:text-black">N</b> = Normal / ปกติ</span>
+            <span><b class="text-amber-500 print:text-black">AB</b> = Abnormal / ไม่ปกติ</span>
+            <span><b class="text-red-500 print:text-black">F</b> = Fail / ชำรุด</span>
+        </div>
+
+        <!-- ข้อเสนอแนะเพิ่มเติม -->
+        <div class="mt-2 border border-slate-300 p-2.5 bg-slate-50 rounded-lg text-[11px] sm:text-xs shadow-sm print:bg-transparent print:border-black">
+            <label class="block font-bold text-slate-800 mb-1 print:text-black">ข้อเสนอแนะ / บันทึกการแก้ไข (Suggestions / Corrective Actions) :</label>
+            <textarea id="suggestions" rows="2" class="w-full border border-slate-300 rounded-md p-1.5 bg-white focus:outline-none focus:border-emerald-500 print:border-none print:p-0" placeholder="พิมพ์บันทึกรายละเอียดเพิ่มเติม..."></textarea>
+        </div>
+
+        <!-- โซนช่องเซ็นชื่อดิจิทัล 3 ฝ่าย (จัดกึ่งกลางช่อง 100% ป้องกันลายเซ็นเอียงซ้ายเวลาออก PDF) -->
+        <div class="mt-4 grid grid-cols-3 gap-3 text-center text-[11px]">
+            
+            <!-- 1. ช่างผู้ปฏิบัติงาน -->
+            <div class="border border-slate-300 rounded-lg p-2 flex flex-col justify-between bg-white shadow-sm print:border-black">
+                <span class="font-bold text-slate-800 block border-b border-slate-100 pb-1 mb-1 print:border-black print:text-black">บำรุงรักษาโดย (Maintained By)</span>
+                
+                <!-- การเซ็นบนหน้าเว็บ -->
+                <div onclick="openSignatureModal(1)" class="sig-box-trigger w-full h-14 border border-dashed border-slate-400 bg-slate-50 rounded flex items-center justify-center cursor-pointer overflow-hidden no-print transition hover:bg-slate-100">
+                    <img id="sig-display-1" class="hidden max-h-full max-w-full">
+                    <span id="sig-hint-1" class="text-slate-500 text-[10px]">🖊️ กดเพื่อเซ็นชื่อ</span>
+                </div>
+                
+                <!-- วางกึ่งกลางในหน้ากระดาษ PDF (ไม่เอียงซ้าย) -->
+                <div class="print-sig-container">
+                    <img id="sig-print-1" class="print-sig-img">
+                </div>
+                
+                <div class="mt-1">
+                    <input type="text" id="signName1" class="w-full text-center bg-transparent border-none text-xs text-slate-800 print:text-black" placeholder="( ............................................ )">
+                    <div class="text-[10px] text-slate-500 mt-0.5 print:text-black">วันที่: <input type="date" id="signDate1" class="bg-transparent text-[10px] border-none text-slate-600 print:text-black w-24 text-center"></div>
+                </div>
+            </div>
+
+            <!-- 2. ผู้ตรวจสอบ -->
+            <div class="border border-slate-300 rounded-lg p-2 flex flex-col justify-between bg-white shadow-sm print:border-black">
+                <span class="font-bold text-slate-800 block border-b border-slate-100 pb-1 mb-1 print:border-black print:text-black">ตรวจสอบโดย (Inspected By)</span>
+                
+                <div onclick="openSignatureModal(2)" class="sig-box-trigger w-full h-14 border border-dashed border-slate-400 bg-slate-50 rounded flex items-center justify-center cursor-pointer overflow-hidden no-print transition hover:bg-slate-100">
+                    <img id="sig-display-2" class="hidden max-h-full max-w-full">
+                    <span id="sig-hint-2" class="text-slate-500 text-[10px]">🖊️ กดเพื่อเซ็นชื่อ</span>
+                </div>
+                
+                <div class="print-sig-container">
+                    <img id="sig-print-2" class="print-sig-img">
+                </div>
+                
+                <div class="mt-1">
+                    <input type="text" id="signName2" class="w-full text-center bg-transparent border-none text-xs text-slate-800 print:text-black" placeholder="( ............................................ )">
+                    <div class="text-[10px] text-slate-500 mt-0.5 print:text-black">วันที่: <input type="date" id="signDate2" class="bg-transparent text-[10px] border-none text-slate-600 print:text-black w-24 text-center"></div>
+                </div>
+            </div>
+
+            <!-- 3. ตัวแทนโรงพยาบาลลูกค้า -->
+            <div class="border border-emerald-200 rounded-lg p-2 flex flex-col justify-between bg-emerald-50/50 shadow-sm print:border-black print:bg-transparent">
+                <span class="font-bold text-emerald-900 block border-b border-emerald-200 pb-1 mb-0.5 print:border-black print:text-black">รับทราบและยินยอมรับมอบงาน</span>
+                <span class="text-[9px] text-emerald-700 block mb-0.5 font-bold print:text-black">บริษัท โรงพยาบาลราชธานี จำกัด (มหาชน)</span>
+                
+                <div onclick="openSignatureModal(3)" class="sig-box-trigger w-full h-14 border border-dashed border-emerald-400 bg-white rounded flex items-center justify-center cursor-pointer overflow-hidden no-print transition hover:bg-emerald-50">
+                    <img id="sig-display-3" class="hidden max-h-full max-w-full">
+                    <span id="sig-hint-3" class="text-emerald-600 text-[10px] font-medium">🖊️ กดเพื่อเซ็นชื่อ</span>
+                </div>
+                
+                <div class="print-sig-container">
+                    <img id="sig-print-3" class="print-sig-img">
+                </div>
+                
+                <div class="mt-1">
+                    <input type="text" id="signName3" class="w-full text-center bg-transparent border-none text-xs text-emerald-950 font-bold print:text-black" placeholder="( ............................................ )">
+                    <div class="text-[10px] text-emerald-700 mt-0.5 font-medium print:text-black">วันที่: <input type="date" id="signDate3" class="bg-transparent text-[10px] border-none text-emerald-800 print:text-black w-24 text-center"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 📌 Modal 1: หน้าต่างกรอกคำนวณอัตราไหลเวียนลม (Airflow Summation Module) -->
+    <div id="airflowModal" class="modal no-print">
+        <div class="bg-white p-5 rounded-xl shadow-2xl max-w-sm w-full mx-4 border border-indigo-200">
+            <h3 class="font-bold text-lg text-indigo-900 text-center mb-1">💨 บันทึกคำนวณอัตราไหลเวียนลม</h3>
+            <p class="text-[11px] text-slate-500 text-center mb-4">เพิ่มค่าความแรงแต่ละจุด ระบบจะรวม CFM ให้แบบเรียลไทม์</p>
+            
+            <div id="airflowInputsContainer" class="space-y-2 max-h-60 overflow-y-auto mb-4 p-1">
+                <!-- เนื้อหาช่องอินพุตจะถูกประมวลผลด้วย JS -->
+            </div>
+            
+            <button onclick="addAirflowInput()" class="w-full bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-dashed border-indigo-300 py-2 rounded-lg text-xs font-bold mb-4 transition cursor-pointer">
+                + เพิ่มจุดตรวจวัดลม (Add Point)
+            </button>
+
+            <div class="bg-indigo-50 p-3 rounded-lg flex justify-between items-center mb-4 border border-indigo-100">
+                <span class="font-bold text-indigo-900 text-sm">ผลรวมทั้งหมด (Total):</span>
+                <span class="font-bold text-indigo-700 text-lg"><span id="airflowModalTotal">0</span> <span class="text-xs">CFM</span></span>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="closeAirflowModal()" class="bg-slate-400 hover:bg-slate-500 text-white px-3 py-2 rounded-lg text-sm font-medium w-1/3 transition cursor-pointer">ยกเลิก</button>
+                <button onclick="saveAirflowModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-bold flex-1 shadow-md transition cursor-pointer">✔️ บันทึกค่าลม</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📌 Modal 2: หน้าต่างเซ็นชื่อดิจิทัลความละเอียดสูง (High-Res Digital Canvas) -->
+    <div id="signatureModal" class="modal no-print">
+        <div class="bg-white p-4 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-slate-200">
+            <h3 id="modalTitle" class="font-bold text-sm text-slate-800 text-center mb-3">🖊️ ลงลายมือชื่ออิเล็กทรอนิกส์</h3>
+            <div class="relative w-full overflow-hidden bg-slate-50 rounded-lg">
+                <!-- ขยายความละเอียด Canvas เป็น 1600x800 พิกเซล ลายเส้นเรียบเนียนคมชัดทุกอุปกรณ์ -->
+                <canvas id="modalCanvas" class="popup-canvas w-full shadow-inner" style="height: 200px;" width="1600" height="800"></canvas>
+            </div>
+            <p class="text-[11px] text-slate-400 text-center mt-2">กรุณาเซ็นชื่อด้านบนโดยลากนิ้วหรือปากกาสไตลัสช้าๆ</p>
+            <div class="flex gap-2 mt-4">
+                <button onclick="clearModalSignature()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg text-xs font-bold flex-1 transition cursor-pointer">ล้างหน้าจอ</button>
+                <button onclick="closeSignatureModal()" class="bg-slate-400 hover:bg-slate-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition cursor-pointer">ยกเลิก</button>
+                <button onclick="saveModalSignature()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1 shadow-md transition cursor-pointer">✔️ ยืนยันลายเซ็น</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Engine ควบคุมการทำงานทั้งหมด -->
+    <script>
+        const fields = ["1", "2_1", "2_2", "2_3", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
+        
+        // ตั้งค่าวันที่ของเอกสารให้เป็นปัจจุบัน
+        document.getElementById('actionDate').valueAsDate = new Date();
+        [1,2,3].forEach(id => document.getElementById(`signDate${id}`).valueAsDate = new Date());
+
+        // --- ระบบควบคุม Dropdown ตัวเลือกประเภทห้อง ---
+        function handleSystemTypeChange() {
+            const selectElement = document.getElementById('systemType');
+            const otherInput = document.getElementById('systemTypeOther');
+            if (selectElement.value === 'Other') {
+                otherInput.classList.remove('hidden');
+                otherInput.value = '';
+                otherInput.focus();
+            } else {
+                otherInput.classList.add('hidden');
+                otherInput.value = selectElement.value;
+            }
+        }
+
+        // --- ระบบแจ้งเตือนรูปแบบใหม่ (Toast System) ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-2 p-3.5 rounded-xl shadow-xl border text-xs font-bold transition-all transform translate-y-2 opacity-0 pointer-events-auto max-w-sm ${
+                type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-300 text-slate-800'
+            }`;
+            toast.innerHTML = `<span>${type === 'success' ? '🟢' : 'ℹ️'}</span><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // เอฟเฟกต์ Fade-in
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+
+            // ปิดตัวเองในเวลา 3.5 วินาที
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // --- ระบบป๊อปอัพยืนยันแบบกำหนดเอง (Custom Confirm Modal) ---
+        function showConfirm(message, onOk) {
+            const modal = document.getElementById('customConfirmModal');
+            document.getElementById('confirmMessage').textContent = message;
+            modal.classList.add('active');
+
+            const cancelBtn = document.getElementById('confirmCancelBtn');
+            const okBtn = document.getElementById('confirmOkBtn');
+
+            const cleanup = () => {
+                modal.classList.remove('active');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            cancelBtn.onclick = cleanup;
+            okBtn.onclick = () => {
+                cleanup();
+                if (typeof onOk === 'function') onOk();
+            };
+        }
+
+        // --- 💨 ระบบวัดและรวมปริมาตรลมในห้อง (Airflow System) ---
+        let airflowValues = [""]; 
+        
+        function openAirflowModal() {
+            renderAirflowInputs();
+            document.getElementById('airflowModal').classList.add('active');
+        }
+
+        function closeAirflowModal() {
+            document.getElementById('airflowModal').classList.remove('active');
+        }
+
+        function renderAirflowInputs() {
+            const container = document.getElementById('airflowInputsContainer');
+            container.innerHTML = '';
+            let total = 0;
+
+            airflowValues.forEach((val, index) => {
+                const num = parseFloat(val) || 0;
+                total += num;
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 bg-white border border-slate-200 p-2 rounded-md shadow-sm';
+                row.innerHTML = `
+                    <span class="text-xs font-bold text-slate-500 w-12">จุดที่ ${index + 1}</span>
+                    <input type="number" step="0.1" class="flex-1 bg-slate-50 border border-slate-300 rounded px-2 py-1 text-sm font-bold text-indigo-800 focus:outline-none focus:border-indigo-500" placeholder="ระบุค่า..." value="${val}" oninput="updateAirflowValue(${index}, this.value)">
+                    <button onclick="removeAirflowInput(${index})" class="text-red-400 hover:text-red-600 font-bold px-2 text-lg leading-none cursor-pointer" title="ลบ">&times;</button>
+                `;
+                container.appendChild(row);
+            });
+            document.getElementById('airflowModalTotal').textContent = total.toFixed(1).replace(/\.0$/, '');
+        }
+
+        function updateAirflowValue(index, value) {
+            airflowValues[index] = value;
+            let total = 0;
+            airflowValues.forEach(v => total += (parseFloat(v) || 0));
+            document.getElementById('airflowModalTotal').textContent = total.toFixed(1).replace(/\.0$/, '');
+        }
+
+        function addAirflowInput() {
+            airflowValues.push("");
+            renderAirflowInputs();
+            const container = document.getElementById('airflowInputsContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeAirflowInput(index) {
+            if (airflowValues.length > 1) {
+                airflowValues.splice(index, 1);
+            } else {
+                airflowValues[0] = "";
+            }
+            renderAirflowInputs();
+        }
+
+        function saveAirflowModal() {
+            let total = 0;
+            airflowValues.forEach(v => total += (parseFloat(v) || 0));
+            document.getElementById('val-8_airflow').value = total.toFixed(1).replace(/\.0$/, '');
+            closeAirflowModal();
+            showToast("บันทึกคำนวณปริมาณลมรวมสำเร็จแล้ว");
+        }
+
+
+        // --- 🖋️ ระบบประมวลผลวาดลายเซ็นความละเอียดสูง ---
+        let currentSigTarget = null;
+        const sigModal = document.getElementById('signatureModal');
+        const modalCanvas = document.getElementById('modalCanvas');
+        const modalCtx = modalCanvas.getContext('2d');
+        
+        let isDrawing = false;
+        let savedSignatures = { 1: null, 2: null, 3: null };
+        let lastX = 0, lastY = 0;
+
+        function getCanvasPos(e) {
+            const rect = modalCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (modalCanvas.width / rect.width),
+                y: (clientY - rect.top) * (modalCanvas.height / rect.height)
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasPos(e);
+            lastX = pos.x; lastY = pos.y;
+            
+            modalCtx.strokeStyle = '#0f172a';
+            modalCtx.lineWidth = 11;
+            modalCtx.lineCap = 'round';
+            modalCtx.lineJoin = 'round';
+            
+            modalCtx.beginPath();
+            modalCtx.moveTo(lastX, lastY);
+        }
+
+        function drawSmooth(e) {
+            if (!isDrawing) return;
+            if (e.cancelable) e.preventDefault();
+            const pos = getCanvasPos(e);
+            const midX = (lastX + pos.x) / 2;
+            const midY = (lastY + pos.y) / 2;
+            modalCtx.quadraticCurveTo(lastX, lastY, midX, midY);
+            modalCtx.stroke();
+            lastX = pos.x; lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                modalCtx.lineTo(lastX, lastY);
+                modalCtx.stroke();
+                isDrawing = false;
+            }
+        }
+
+        modalCanvas.addEventListener('mousedown', startDrawing);
+        modalCanvas.addEventListener('mousemove', drawSmooth);
+        window.addEventListener('mouseup', stopDrawing);
+        modalCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+        modalCanvas.addEventListener('touchmove', drawSmooth, { passive: false });
+        window.addEventListener('touchend', stopDrawing);
+
+        function openSignatureModal(targetId) {
+            currentSigTarget = targetId;
+            const titles = { 1: "ช่างผู้ปฏิบัติงาน (ช่าง PM)", 2: "วิศวกรผู้ตรวจสอบ (Engineer)", 3: "ตัวแทนโรงพยาบาลราชธานี" };
+            document.getElementById('modalTitle').textContent = `🖊️ ลงลายมือชื่อ: ${titles[targetId]}`;
+            modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+            
+            if (savedSignatures[targetId]) {
+                const img = new Image();
+                img.src = savedSignatures[targetId];
+                img.onload = () => modalCtx.drawImage(img, 0, 0);
+            }
+            sigModal.classList.add('active');
+        }
+
+        function closeSignatureModal() { sigModal.classList.remove('active'); currentSigTarget = null; }
+        function clearModalSignature() { modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height); }
+
+        function saveModalSignature() {
+            const blank = document.createElement('canvas');
+            blank.width = modalCanvas.width; blank.height = modalCanvas.height;
+            if (modalCanvas.toDataURL() === blank.toDataURL()) {
+                savedSignatures[currentSigTarget] = null;
+                document.getElementById(`sig-display-${currentSigTarget}`).classList.add('hidden');
+                document.getElementById(`sig-hint-${currentSigTarget}`).classList.remove('hidden');
+                document.getElementById(`sig-print-${currentSigTarget}`).src = '';
+            } else {
+                const dataUrl = modalCanvas.toDataURL();
+                savedSignatures[currentSigTarget] = dataUrl;
+                
+                // นำข้อมูลภาพไปผูกเข้ากับหน้าเว็บและใบพิมพ์ PDF
+                document.getElementById(`sig-display-${currentSigTarget}`).src = dataUrl;
+                document.getElementById(`sig-display-${currentSigTarget}`).classList.remove('hidden');
+                document.getElementById(`sig-hint-${currentSigTarget}`).classList.add('hidden');
+                
+                document.getElementById(`sig-print-${currentSigTarget}`).src = dataUrl;
+            }
+            closeSignatureModal();
+            showToast("บันทึกภาพลายเซ็นเรียบร้อย");
+        }
+
+        // --- 💾 ระบบฐานข้อมูล LOCAL STORAGE ---
+        function saveCurrentData() {
+            const rNo = document.getElementById('reportNo').value || 'PM-' + Date.now();
+            const payload = {
+                systemType: document.getElementById('systemType').value,
+                systemTypeOther: document.getElementById('systemTypeOther').value,
+                project: document.getElementById('project').value,
+                customer: document.getElementById('customer').value,
+                location: document.getElementById('location').value,
+                timeCount: document.getElementById('timeCount').value,
+                reportNo: rNo, refDoc: document.getElementById('refDoc').value,
+                actionDate: document.getElementById('actionDate').value,
+                machineModel: document.getElementById('machineModel').value,
+                series: document.getElementById('series').value,
+                suggestions: document.getElementById('suggestions').value,
+                signName1: document.getElementById('signName1').value, signDate1: document.getElementById('signDate1').value,
+                signName2: document.getElementById('signName2').value, signDate2: document.getElementById('signDate2').value,
+                signName3: document.getElementById('signName3').value, signDate3: document.getElementById('signDate3').value,
+                statusRadio: {}, textValues: {}, sigs: savedSignatures, airflow: airflowValues
+            };
+
+            fields.forEach(f => {
+                const checked = document.querySelector(`input[name="st-${f}"]:checked`);
+                payload.statusRadio[f] = checked ? checked.value : 'N';
+            });
+            document.querySelectorAll('input[id^="val-"], input[id^="rem-"], select[id^="val-"]').forEach(i => payload.textValues[i.id] = i.value);
+
+            localStorage.setItem('ICE_PM_' + rNo, JSON.stringify(payload));
+            showToast(`💾 บันทึกรายงานใบงานที่ ${rNo} สำเร็จ!`);
+            renderHistoryMenu();
+        }
+
+        function renderHistoryMenu() {
+            const menu = document.getElementById('historySelect');
+            menu.innerHTML = '<option value="">-- เลือกรายงานเก่ามาแสดงผลหรือสั่งพิมพ์ --</option>';
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k.startsWith('ICE_PM_')) {
+                    const obj = JSON.parse(localStorage.getItem(k));
+                    const opt = document.createElement('option');
+                    opt.value = k; opt.textContent = `No: ${obj.reportNo} | ${obj.customer} (${obj.actionDate})`;
+                    menu.appendChild(opt);
+                }
+            }
+        }
+
+        function loadHistoryData() {
+            const k = document.getElementById('historySelect').value;
+            if (!k) {
+                showToast("กรุณาเลือกประวัติจากกล่องรายชื่อด้านซ้ายก่อนโหลดข้อมูลครับ", "info");
+                return;
+            }
+            const res = JSON.parse(localStorage.getItem(k));
+            
+            if (res.systemType) {
+                document.getElementById('systemType').value = res.systemType;
+                document.getElementById('systemTypeOther').value = res.systemTypeOther || res.systemType;
+                if (res.systemType === 'Other') {
+                    document.getElementById('systemTypeOther').classList.remove('hidden');
+                } else {
+                    document.getElementById('systemTypeOther').classList.add('hidden');
+                }
+            }
+
+            ['project','customer','location','timeCount','reportNo','refDoc','actionDate','machineModel','series','suggestions',
+             'signName1','signDate1','signName2','signDate2','signName3','signDate3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = res[id] || '';
+            });
+
+            if (res.statusRadio) Object.keys(res.statusRadio).forEach(f => {
+                const r = document.querySelector(`input[name="st-${f}"][value="${res.statusRadio[f]}"]`);
+                if (r) r.checked = true;
+            });
+            if (res.textValues) Object.keys(res.textValues).forEach(id => {
+                const el = document.getElementById(id); if (el) el.value = res.textValues[id];
+            });
+
+            airflowValues = res.airflow || [""];
+            
+            savedSignatures = res.sigs || { 1: null, 2: null, 3: null };
+            [1, 2, 3].forEach(id => {
+                const url = savedSignatures[id];
+                const disp = document.getElementById(`sig-display-${id}`);
+                const hint = document.getElementById(`sig-hint-${id}`);
+                const prnt = document.getElementById(`sig-print-${id}`);
+                if (url) {
+                    disp.src = url; disp.classList.remove('hidden'); hint.classList.add('hidden'); prnt.src = url;
+                } else {
+                    disp.classList.add('hidden'); hint.classList.remove('hidden'); prnt.src = '';
+                }
+            });
+            showToast('📂 โหลดประวัติใบรายงานเลขที่ ' + res.reportNo + ' เรียบร้อยแล้วครับ');
+        }
+
+        function triggerClearForm() {
+            showConfirm('🧹 คุณต้องการล้างข้อมูลสถานะและการตรวจสอบทั้งหมดเพื่อเปิดใบงานห้องใหม่ใช่หรือไม่?', () => {
+                clearForm();
+            });
+        }
+
+        // --- 🧹 ฟังก์ชันล้างฟอร์ม (เคลียร์ค่าการวัดทั้งหมดเพื่อเริ่มห้องใหม่ โดยยังคงชื่อโครงการหลักเพื่อความสะดวก) ---
+        function clearForm() {
+            document.getElementById('systemType').value = 'Negative Pressure Room';
+            document.getElementById('systemTypeOther').value = 'Negative Pressure Room';
+            document.getElementById('systemTypeOther').classList.add('hidden');
+
+            // ล้างข้อมูลช่องข้อความ และช่องตัวเลขที่เคยบันทึกไว้ (ยกเว้นรายละเอียดโครงการหลักเพื่อความสะดวก)
+            document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(i => {
+                if (['project', 'customer', 'location', 'timeCount', 'systemTypeOther'].includes(i.id)) {
+                    return; // ข้ามการล้างค่า Metadata ส่วนหัว
+                }
+                
+                if (i.id.startsWith('signDate') || i.id === 'actionDate') {
+                    i.valueAsDate = new Date();
+                } else {
+                    i.value = '';
+                }
+            });
+
+            // ล้างช่องบันทึกแก้ไข
+            document.getElementById('suggestions').value = '';
+
+            // รีเซ็ตจุดวัดความเร็วลม
+            document.getElementById('val-8_airflow').value = '0';
+            airflowValues = [""];
+
+            // รีเซ็ตปุ่มสถานะวิทยุ (N)
+            fields.forEach(f => {
+                const r = document.querySelector(`input[name="st-${f}"][value="N"]`);
+                if (r) r.checked = true;
+            });
+
+            // คืนค่า Dropdown ตัวเลือกสถานะทั้งหมดในหมวด A คืนเป็น "ปกติ"
+            document.querySelectorAll('select[id^="val-"]').forEach(s => s.value = 'ปกติ');
+            
+            // ล้างลายเซ็นของทุกฝ่าย
+            savedSignatures = { 1: null, 2: null, 3: null };
+            [1, 2, 3].forEach(id => {
+                document.getElementById(`sig-display-${id}`).classList.add('hidden');
+                document.getElementById(`sig-hint-${id}`).classList.remove('hidden');
+                document.getElementById(`sig-print-${id}`).src = '';
+            });
+
+            showToast("ล้างข้อมูลช่องการตรวจวัดและลายเซ็นเรียบร้อยแล้ว");
+        }
+
+        function triggerClearStorage() {
+            showConfirm('🚨 คุณแน่ใจที่จะล้างฐานข้อมูลรายงานของเครื่องนี้ถาวรใช่ไหม?', () => {
+                clearAllStorage();
+            });
+        }
+
+        function clearAllStorage() {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                if (localStorage.key(i).startsWith('ICE_PM_')) localStorage.removeItem(localStorage.key(i));
+            }
+            renderHistoryMenu(); 
+            showToast('ล้างคลังประวัติเรียบร้อยแล้ว');
+        }
+
+        // --- 📊 ระบบ Export to Excel (CSV UTF-8 BOM) ---
+        function exportToExcel() {
+            const rNo = document.getElementById('reportNo').value || 'PM_Report';
+            const sysType = document.getElementById('systemType').value === 'Other' ? document.getElementById('systemTypeOther').value : document.getElementById('systemType').value;
+            
+            const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
+            const getRadio = (name) => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+
+            // แปลงข้อมูลเป็นชุดตาราง CSV ภาษาไทยแบบไม่เพี้ยน (มี BOM \uFEFF)
+            let csv = "\uFEFF"; 
+            csv += "แบบฟอร์มตรวจสอบบำรุงรักษาเชิงป้องกัน (PM Checklist)\n";
+            csv += `ประเภทห้อง (System),${sysType}\n\n`;
+            
+            csv += `Project,${getVal('project')},,Report No,${getVal('reportNo')}\n`;
+            csv += `Customer,${getVal('customer')},,Ref. Doc No,${getVal('refDoc')}\n`;
+            csv += `Location,${getVal('location')},,Action Date,${getVal('actionDate')}\n`;
+            csv += `ครั้งที่ (No.),${getVal('timeCount')},,Machine Model,${getVal('machineModel')}\n`;
+            csv += `,,,Series / S/N,${getVal('series')}\n\n`;
+            
+            csv += "ลำดับ,รายการตรวจสอบ,ค่าที่วัดได้/การดำเนินการ,สถานะ (N/AB/F),หมายเหตุ (Remark)\n";
+            
+            const checkItems = [
+                { id: "1", desc: "ทำความสะอาดคอยล์เย็น AHU และคอยล์ร้อน CDU", valId: "val-1_action" },
+                { id: "2_1", desc: "ทำความสะอาด/เปลี่ยน - Prefilter", valId: "val-2_1_action" },
+                { id: "2_2", desc: "ทำความสะอาด/เปลี่ยน - Medium filter", valId: "val-2_2_action" },
+                { id: "2_3", desc: "ทำความสะอาด/เปลี่ยน - Hepafilter", valId: "val-2_3_action" },
+                { id: "3", desc: "ทำความสะอาดหน้ากริดหัวจ่าย", valId: "val-3_action" },
+                { id: "4", desc: "ตรวจสอบท่อหุ้มฉนวน ปลอกหุ้มฯ", valId: "val-4_action" },
+                { id: "5", desc: "ตรวจสอบการสั่นสะเทือนและเสียงดังผิดปกติของ AHU", valId: "val-5_action" },
+                { id: "6", desc: "ตรวจสอบขอบยางและซีลประตูห้อง", val: "เช็คซีลลมรั่ว" },
+                { id: "7", desc: "วัดอุณหภูมิและความชื้นสัมพัทธ์", val: `Temp: ${getVal('val-7_temp')} C, RH: ${getVal('val-7_rh')} %` },
+                { id: "8", desc: "ตรวจเช็คอัตราการไหลภายในห้อง", val: `${getVal('val-8_airflow')} CFM` },
+                { id: "9", desc: "วัดระดับแรงดันต่างของห้อง", val: `DP1: ${getVal('val-9_dp1')} Pa, DP2: ${getVal('val-9_dp2')} Pa` },
+                { id: "10", desc: "วัดค่าน้ำยาของเครื่องปรับอากาศ", val: `Suction: ${getVal('val-10_1')}, Discharge: ${getVal('val-10_2')} PSI` },
+                { id: "11", desc: "ทดสอบการสั่งการระบบอุณหภูมิ", val: "ทดสอบ ตัด / ต่อ" }
+            ];
+
+            checkItems.forEach(it => {
+                const desc = it.desc.replace(/,/g, " ");
+                const val = (it.val || getVal(it.valId)).replace(/,/g, " ");
+                const radio = getRadio(`st-${it.id}`);
+                const remark = getVal(`rem-${it.id}`).replace(/,/g, " ");
+                csv += `${it.id},${desc},${val},${radio},${remark}\n`;
+            });
+
+            csv += "\n--- หมวดระบบไฟฟ้า (Electrical Measurement) ---\n";
+            csv += `12,AHU Input Voltage,L1-L2: ${getVal('val-12_1')}V | L2-L3: ${getVal('val-12_2')}V | L1-L3: ${getVal('val-12_3')}V | Ctrl: ${getVal('val-12_4')}V,,${getVal('rem-12').replace(/,/g, " ")}\n`;
+            csv += `13,AHU Input Current,Input L1: ${getVal('val-13_1')}A | L2: ${getVal('val-13_2')}A | L3: ${getVal('val-13_3')}A | Fan: ${getVal('val-13_4')}A | Heater: ${getVal('val-13_5')}A,,${getVal('rem-13').replace(/,/g, " ")}\n`;
+            csv += `14,CDU Input Voltage,L1-L2: ${getVal('val-14_1')}V | L2-L3: ${getVal('val-14_2')}V | L1-L3: ${getVal('val-14_3')}V | Ctrl: ${getVal('val-14_4')}V,,${getVal('rem-14').replace(/,/g, " ")}\n`;
+            csv += `15,CDU Input Current,Comp L1: ${getVal('val-15_1')}A | Comp L2: ${getVal('val-15_2')}A | Comp L3: ${getVal('val-15_3')}A | Fan: ${getVal('val-15_4')}A,,${getVal('rem-15').replace(/,/g, " ")}\n\n`;
+
+            csv += `ข้อเสนอแนะ / บันทึกการแก้ไข,${getVal('suggestions').replace(/[\r\n,]/g, " ")}\n`;
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${rNo}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast(`📊 ดาวน์โหลดรายงานในรูปแบบ CSV สำเร็จ!`, "success");
+        }
+
+        renderHistoryMenu();
+    </script>
+</body>
+</html>
